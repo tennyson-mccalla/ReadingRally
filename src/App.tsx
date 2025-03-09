@@ -1,8 +1,8 @@
 import React from 'react';
-import ComponentDemo from './pages/ComponentDemo';
+import Dashboard from './pages/Dashboard';
 
 function App() {
-  return <ComponentDemo />;
+  return <Dashboard />;
 }
 
 export default App;
