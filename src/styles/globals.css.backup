@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-slate-50 text-slate-900;
+}
+
+.reading-container {
+  @apply font-reading text-xl md:text-2xl leading-relaxed;
+}
+
+.btn-primary {
+  @apply bg-primary-500 hover:bg-primary-600 text-white font-bold py-2 px-4 rounded-lg transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-secondary-500 hover:bg-secondary-600 text-white font-bold py-2 px-4 rounded-lg transition-colors;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-md p-6;
+}
+
+.achievement-badge {
+  @apply inline-block rounded-full p-1 bg-yellow-100 text-yellow-800 border-2 border-yellow-300;
+}
+
