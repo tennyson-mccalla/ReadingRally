@@ -34,7 +34,10 @@ export interface Achievement {
   id: string;
   name: string;
   description: string;
-  criteria: string;
-  iconPath: string;
+  icon: string;
+  progress: number;
+  maxProgress: number;
+  achieved: boolean;
+  dateAchieved?: string;
+  category: 'speed' | 'accuracy' | 'completion' | 'streak';
 }
-
