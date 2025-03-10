@@ -5,6 +5,8 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   variant?: 'primary' | 'secondary' | 'accent' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -12,10 +14,13 @@ export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
   isLoading = false,
+  leftIcon,
+  rightIcon,
   className,
+  disabled,
   ...props
 }) => {
-  const baseClasses = 'btn';
+  const baseClasses = 'btn font-medium focus:outline-none focus:ring-2 focus:ring-offset-2';
 
   const variantClasses = {
     primary: 'btn-primary',
@@ -26,7 +31,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   const sizeClasses = {
     sm: 'btn-sm',
-    md: '',
+    md: 'btn-md',
     lg: 'btn-lg',
   };
 
@@ -35,12 +40,19 @@ export const Button: React.FC<ButtonProps> = ({
     variantClasses[variant],
     sizeClasses[size],
     isLoading && 'loading',
+    disabled && 'btn-disabled',
     className
   );
 
   return (
-    <button className={buttonClasses} {...props}>
+    <button
+      className={buttonClasses}
+      disabled={disabled || isLoading}
+      {...props}
+    >
+      {!isLoading && leftIcon && <span className="mr-2">{leftIcon}</span>}
       {children}
+      {!isLoading && rightIcon && <span className="ml-2">{rightIcon}</span>}
     </button>
   );
 };

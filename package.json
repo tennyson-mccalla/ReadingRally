@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "chart.js": "^4.4.0",
+    "clsx": "^2.1.1",
     "daisyui": "^3.9.2",
     "framer-motion": "^12.4.10",
     "react": "^18.2.0",

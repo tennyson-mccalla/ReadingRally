@@ -3,24 +3,31 @@ import clsx from 'clsx';
 
 export interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'accent' | 'success';
+  variant?: 'default' | 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error';
   size?: 'sm' | 'md' | 'lg';
+  outline?: boolean;
   className?: string;
+  icon?: React.ReactNode;
 }
 
 export const Badge: React.FC<BadgeProps> = ({
   children,
-  variant = 'primary',
+  variant = 'default',
   size = 'md',
+  outline = false,
   className,
+  icon,
 }) => {
-  const baseClasses = 'badge';
+  const baseClasses = 'badge font-medium';
 
   const variantClasses = {
+    default: 'badge-neutral',
     primary: 'badge-primary',
     secondary: 'badge-secondary',
     accent: 'badge-accent',
     success: 'badge-success',
+    warning: 'badge-warning',
+    error: 'badge-error',
   };
 
   const sizeClasses = {
@@ -33,8 +40,14 @@ export const Badge: React.FC<BadgeProps> = ({
     baseClasses,
     variantClasses[variant],
     sizeClasses[size],
+    outline && 'badge-outline',
     className
   );
 
-  return <div className={badgeClasses}>{children}</div>;
+  return (
+    <div className={badgeClasses}>
+      {icon && <span className="mr-1">{icon}</span>}
+      {children}
+    </div>
+  );
 };
