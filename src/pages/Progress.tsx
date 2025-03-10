@@ -3,13 +3,21 @@ import { MainLayout } from '../components/layout';
 import { ProgressDashboard } from '../components/progress/ProgressDashboard';
 import { AchievementsDashboard } from '../components/achievements/AchievementsDashboard';
 import { Button } from '../common';
+import { useProgressStore } from '../store/progressStore';
 
 // This would normally come from your state management solution
 import { ProgressTracker } from '../services/ProgressTracker';
 
 export default function Progress() {
   const [activeTab, setActiveTab] = React.useState<'progress' | 'achievements'>('progress');
-  const progressTracker = React.useRef(new ProgressTracker());
+  const {
+    getReadingHistory,
+    getAchievements,
+    getCurrentLevel,
+    getNextLevelProgress,
+    getTotalMinutesRead,
+    getBooksCompleted,
+  } = useProgressStore();
 
   // Demo data - in production, this would be loaded from your backend
   React.useEffect(() => {
@@ -90,18 +98,18 @@ export default function Progress() {
 
         {activeTab === 'progress' ? (
           <ProgressDashboard
-            readingHistory={progressTracker.current.getReadingHistory()}
-            booksCompleted={progressTracker.current.getBooksCompleted()}
-            totalMinutesRead={progressTracker.current.getTotalMinutesRead()}
-            currentLevel={progressTracker.current.getCurrentLevel()}
-            nextLevelProgress={progressTracker.current.getNextLevelProgress()}
+            readingHistory={getReadingHistory()}
+            booksCompleted={getBooksCompleted()}
+            totalMinutesRead={getTotalMinutesRead()}
+            currentLevel={getCurrentLevel()}
+            nextLevelProgress={getNextLevelProgress()}
           />
         ) : (
           <AchievementsDashboard
-            achievements={progressTracker.current.getAchievements()}
-            totalPoints={progressTracker.current.getBooksCompleted() * 100}
-            currentRank={`Level ${progressTracker.current.getCurrentLevel()} Reader`}
-            nextRankProgress={progressTracker.current.getNextLevelProgress()}
+            achievements={getAchievements()}
+            totalPoints={getBooksCompleted() * 100}
+            currentRank={`Level ${getCurrentLevel()} Reader`}
+            nextRankProgress={getNextLevelProgress()}
           />
         )}
       </div>
