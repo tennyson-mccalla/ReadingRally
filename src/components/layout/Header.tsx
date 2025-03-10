@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '../common/Button';
+import { useRewardsStore } from '../../store/rewardsStore';
 
 export const Header: React.FC = () => {
   const location = useLocation();
+  const { points, streak } = useRewardsStore();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -42,6 +44,14 @@ export const Header: React.FC = () => {
                 Start Reading
               </Button>
             </Link>
+            <Link to="/rewards">
+              <Button
+                variant={isActive('/rewards') ? 'primary' : 'ghost'}
+                size="sm"
+              >
+                Rewards {points > 0 && `(${points}p)`}
+              </Button>
+            </Link>
             <div className="dropdown dropdown-end">
               <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                 <div className="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center">
@@ -49,6 +59,18 @@ export const Header: React.FC = () => {
                 </div>
               </label>
               <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                <li>
+                  <a className="justify-between">
+                    Points
+                    <span className="badge badge-primary">{points}</span>
+                  </a>
+                </li>
+                <li>
+                  <a className="justify-between">
+                    Streak
+                    <span className="badge badge-accent">{streak} days</span>
+                  </a>
+                </li>
                 <li><a>Profile</a></li>
                 <li><a>Settings</a></li>
                 <li><a>Logout</a></li>

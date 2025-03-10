@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { MainLayout } from '../components/layout';
 import { Button, Card, CardBody, Progress, TimerProgress, Notification, Alert, Spinner } from '../components/common';
 import { AudioRecorder } from '../services/AudioRecorder';
 import { AIAnalysisService } from '../services/AIAnalysis';
+import { useProgressStore } from '../store/progressStore';
+import { useRewardsStore } from '../store/rewardsStore';
+import { RewardAnimation } from '../components/rewards/RewardAnimation';
 
 // Mock text for demo
 const SAMPLE_TEXT = `Once upon a time, in a cozy little house at the end of a winding road, there lived a curious cat named Whiskers. Whiskers loved to watch the birds that visited the garden outside his window. Every morning, he would sit on the windowsill, his tail swishing back and forth, as he dreamed of making friends with the cheerful birds.`;
@@ -15,14 +18,13 @@ const GRADE_LEVEL_CONFIG = {
   8: { maxTime: 30, expectedWpm: 200 },
 };
 
-type SessionState = 'instructions' | 'ready' | 'reading' | 'analyzing' | 'complete';
-
-interface ReadingAnalysis {
-  transcript: string;
+interface ReadingSessionState {
   wpm: number;
   accuracy: number;
   fluency: number;
-  feedback: string;
+  duration: number;
+  bookId: string;
+  completed: boolean;
 }
 
 export default function ReadingSession() {
@@ -30,17 +32,36 @@ export default function ReadingSession() {
   const maxTime = GRADE_LEVEL_CONFIG[gradeLevel].maxTime;
   const expectedWpm = GRADE_LEVEL_CONFIG[gradeLevel].expectedWpm;
 
-  const [sessionState, setSessionState] = React.useState<SessionState>('instructions');
+  const [sessionState, setSessionState] = useState<ReadingSessionState>({
+    wpm: 0,
+    accuracy: 0,
+    fluency: 0,
+    duration: 0,
+    bookId: 'book-1',
+    completed: false,
+  });
+
   const [showToast, setShowToast] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState('');
   const [startTime, setStartTime] = React.useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = React.useState(0);
   const [analysis, setAnalysis] = React.useState<ReadingAnalysis | null>(null);
   const [showSpinner, setShowSpinner] = React.useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  const [reward, setReward] = useState<{
+    points?: number;
+    badge?: any;
+  } | null>(null);
 
   // References for services
   const recorderRef = React.useRef<AudioRecorder | null>(null);
   const aiServiceRef = React.useRef<AIAnalysisService | null>(null);
+
+  const { addReadingSession } = useProgressStore();
+  const { addPoints, updateMilestoneProgress, updateStreak } = useRewardsStore();
+
+  const [sessionStep, setSessionStep] = useState<'instructions' | 'ready' | 'reading'>('instructions');
 
   // Initialize services
   React.useEffect(() => {
@@ -48,29 +69,42 @@ export default function ReadingSession() {
     aiServiceRef.current = new AIAnalysisService(import.meta.env.VITE_OPENAI_API_KEY || '');
   }, []);
 
-  // Timer effect
-  React.useEffect(() => {
+  // Simulate reading progress
+  useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (sessionState === 'reading' && startTime) {
-      interval = setInterval(() => {
-        const newElapsedTime = Math.floor((Date.now() - startTime) / 1000);
-        setElapsedTime(newElapsedTime);
 
-        // Auto-complete when max time is reached
-        if (newElapsedTime >= maxTime) {
-          handleCompleteSession();
-        }
-      }, 100);
+    if (isSimulating && !sessionState.completed) {
+      interval = setInterval(() => {
+        setSessionState(prev => {
+          if (prev.completed) return prev;
+
+          const wpm = Math.min(prev.wpm + 5, 150);
+          const accuracy = Math.min(prev.accuracy + 2, 98);
+          const fluency = Math.min(prev.fluency + 3, 95);
+          const duration = prev.duration + 10;
+
+          return {
+            wpm,
+            accuracy,
+            fluency,
+            duration,
+            bookId: 'book-1',
+            completed: false, // Never auto-complete
+          };
+        });
+      }, 1000);
     }
+
     return () => clearInterval(interval);
-  }, [sessionState, startTime, maxTime]);
+  }, [isSimulating]);
 
   const handleStartReading = async () => {
     try {
       await recorderRef.current?.start();
-      setSessionState('reading');
       setStartTime(Date.now());
       setElapsedTime(0);
+      setIsSimulating(true);
+      setSessionStep('reading');
       setToastMessage('Reading session started! Read the text aloud.');
       setShowToast(true);
     } catch (err) {
@@ -80,11 +114,15 @@ export default function ReadingSession() {
     }
   };
 
+  const handleReadyClick = () => {
+    setSessionStep('ready');
+  };
+
   const handleCompleteSession = async () => {
     if (!recorderRef.current || !aiServiceRef.current) return;
 
-    setSessionState('analyzing');
-    const spinnerTimeout = setTimeout(() => setShowSpinner(true), 500);
+    setShowSpinner(true);
+    setIsSimulating(false);
 
     try {
       const audioBlob = await recorderRef.current.stop();
@@ -96,32 +134,87 @@ export default function ReadingSession() {
         finalTime
       );
 
+      // Get final stats
+      const { wpm, accuracy, fluency, duration } = sessionState;
+
+      // Calculate rewards
+      const basePoints = 100;
+      const accuracyBonus = Math.floor((accuracy - 80) / 5) * 10;
+      const wpmBonus = Math.floor((wpm - 60) / 10) * 15;
+      const totalPoints = basePoints + accuracyBonus + wpmBonus;
+
+      // Update all states in sequence
+      setSessionState(prev => ({ ...prev, completed: true }));
       setAnalysis(result);
-      setSessionState('complete');
+
+      // Update rewards and progress after state updates
+      setTimeout(() => {
+        updateMilestoneProgress('wpm', wpm);
+        addPoints(totalPoints, 'Reading session completed');
+        updateStreak();
+
+        addReadingSession({
+          date: new Date().toISOString(),
+          wpm,
+          accuracy,
+          fluency,
+          duration,
+          bookId: 'book-1',
+          completed: true,
+        });
+
+        setReward({
+          points: totalPoints,
+        });
+      }, 0);
+
       setToastMessage("Great job! Here's your analysis.");
     } catch (err) {
       console.error('Analysis error:', err);
       setToastMessage('Failed to analyze reading. Please try again.');
-      setSessionState('ready');
+      setSessionState(prev => ({ ...prev, completed: false }));
     } finally {
-      clearTimeout(spinnerTimeout);
       setShowSpinner(false);
       setShowToast(true);
     }
   };
 
   const handleTryAgain = () => {
-    setSessionState('ready');
-    setAnalysis(null);
+    setSessionState({
+      wpm: 0,
+      accuracy: 0,
+      fluency: 0,
+      duration: 0,
+      bookId: 'book-1',
+      completed: false,
+    });
     setStartTime(null);
     setElapsedTime(0);
+    setIsSimulating(false);
   };
+
+  // Timer effect
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (!sessionState.completed && startTime) {
+      interval = setInterval(() => {
+        const newElapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        setElapsedTime(newElapsedTime);
+
+        // Auto-complete when max time is reached
+        if (newElapsedTime >= maxTime) {
+          handleCompleteSession();
+        }
+      }, 100);
+    }
+    return () => clearInterval(interval);
+  }, [sessionState.completed, startTime, maxTime]);
 
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Instructions State */}
-        {sessionState === 'instructions' && (
+        {sessionStep === 'instructions' && !sessionState.completed && (
           <Card>
             <CardBody>
               <div className="space-y-6 text-center">
@@ -146,7 +239,7 @@ export default function ReadingSession() {
                 <Button
                   variant="primary"
                   size="lg"
-                  onClick={() => setSessionState('ready')}
+                  onClick={handleReadyClick}
                 >
                   I'm Ready
                 </Button>
@@ -156,7 +249,7 @@ export default function ReadingSession() {
         )}
 
         {/* Ready State */}
-        {sessionState === 'ready' && (
+        {sessionStep === 'ready' && !sessionState.completed && (
           <Card>
             <CardBody>
               <div className="space-y-6 text-center">
@@ -178,7 +271,7 @@ export default function ReadingSession() {
         )}
 
         {/* Reading State */}
-        {sessionState === 'reading' && (
+        {sessionStep === 'reading' && !sessionState.completed && (
           <div className="space-y-6">
             <Card>
               <CardBody>
@@ -220,7 +313,7 @@ export default function ReadingSession() {
         )}
 
         {/* Analyzing State */}
-        {sessionState === 'analyzing' && showSpinner && (
+        {showSpinner && (
           <Card>
             <CardBody>
               <div className="flex flex-col items-center gap-4 p-8">
@@ -232,7 +325,7 @@ export default function ReadingSession() {
         )}
 
         {/* Complete State */}
-        {sessionState === 'complete' && analysis && (
+        {sessionState.completed && analysis && (
           <Card>
             <CardBody>
               <div className="space-y-6">
@@ -297,6 +390,15 @@ export default function ReadingSession() {
           </Notification>
         )}
       </div>
+
+      {/* Reward Animation */}
+      {reward && (
+        <RewardAnimation
+          points={reward.points}
+          badge={reward.badge}
+          onComplete={() => setReward(null)}
+        />
+      )}
     </MainLayout>
   );
 }
