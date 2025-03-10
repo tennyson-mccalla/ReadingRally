@@ -1,8 +1,8 @@
 import React from 'react';
-import Dashboard from './pages/Dashboard';
+import ReadingSession from './pages/ReadingSession';
 
 function App() {
-  return <Dashboard />;
+  return <ReadingSession />;
 }
 
 export default App;
