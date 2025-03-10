@@ -1,5 +1,4 @@
 import React from 'react';
-import { MainLayout } from '../components/layout';
 import { ProgressDashboard } from '../components/progress/ProgressDashboard';
 import { AchievementsDashboard } from '../components/achievements/AchievementsDashboard';
 import { Button } from '../common';
@@ -17,6 +16,7 @@ export default function Progress() {
     getNextLevelProgress,
     getTotalMinutesRead,
     getBooksCompleted,
+    addReadingSession
   } = useProgressStore();
 
   // Demo data - in production, this would be loaded from your backend
@@ -71,48 +71,46 @@ export default function Progress() {
     ];
 
     demoSessions.forEach(session => {
-      progressTracker.current.addReadingSession(session);
+      addReadingSession(session);
     });
-  }, []);
+  }, [addReadingSession]);
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">My Progress</h1>
-          <div className="flex gap-2">
-            <Button
-              variant={activeTab === 'progress' ? 'primary' : 'ghost'}
-              onClick={() => setActiveTab('progress')}
-            >
-              Progress
-            </Button>
-            <Button
-              variant={activeTab === 'achievements' ? 'primary' : 'ghost'}
-              onClick={() => setActiveTab('achievements')}
-            >
-              Achievements
-            </Button>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">My Progress</h1>
+        <div className="flex gap-2">
+          <Button
+            variant={activeTab === 'progress' ? 'primary' : 'ghost'}
+            onClick={() => setActiveTab('progress')}
+          >
+            Progress
+          </Button>
+          <Button
+            variant={activeTab === 'achievements' ? 'primary' : 'ghost'}
+            onClick={() => setActiveTab('achievements')}
+          >
+            Achievements
+          </Button>
         </div>
-
-        {activeTab === 'progress' ? (
-          <ProgressDashboard
-            readingHistory={getReadingHistory()}
-            booksCompleted={getBooksCompleted()}
-            totalMinutesRead={getTotalMinutesRead()}
-            currentLevel={getCurrentLevel()}
-            nextLevelProgress={getNextLevelProgress()}
-          />
-        ) : (
-          <AchievementsDashboard
-            achievements={getAchievements()}
-            totalPoints={getBooksCompleted() * 100}
-            currentRank={`Level ${getCurrentLevel()} Reader`}
-            nextRankProgress={getNextLevelProgress()}
-          />
-        )}
       </div>
-    </MainLayout>
+
+      {activeTab === 'progress' ? (
+        <ProgressDashboard
+          readingHistory={getReadingHistory()}
+          booksCompleted={getBooksCompleted()}
+          totalMinutesRead={getTotalMinutesRead()}
+          currentLevel={getCurrentLevel()}
+          nextLevelProgress={getNextLevelProgress()}
+        />
+      ) : (
+        <AchievementsDashboard
+          achievements={getAchievements()}
+          totalPoints={getBooksCompleted() * 100}
+          currentRank={`Level ${getCurrentLevel()} Reader`}
+          nextRankProgress={getNextLevelProgress()}
+        />
+      )}
+    </div>
   );
 }
