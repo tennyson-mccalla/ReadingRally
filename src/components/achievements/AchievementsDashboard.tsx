@@ -1,5 +1,9 @@
 import React from 'react';
-import { Card, CardBody, CardTitle, Badge, Progress } from '../common';
+import { Card } from '../common/Card';
+import { CardBody } from '../common/Card';
+import { CardTitle } from '../common/Card';
+import { Badge } from '../common/Badge';
+import { Progress } from '../common/Progress';
 
 interface Achievement {
   id: string;

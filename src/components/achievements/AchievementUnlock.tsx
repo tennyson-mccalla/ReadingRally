@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardBody } from '../common';
+import { Card } from '../common/Card';
+import { CardBody } from '../common/Card';
 
 interface AchievementUnlockProps {
   achievement: {

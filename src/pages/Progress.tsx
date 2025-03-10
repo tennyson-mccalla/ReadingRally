@@ -1,11 +1,8 @@
 import React from 'react';
 import { ProgressDashboard } from '../components/progress/ProgressDashboard';
 import { AchievementsDashboard } from '../components/achievements/AchievementsDashboard';
-import { Button } from '../common';
+import { Button } from '../components/common/Button';
 import { useProgressStore } from '../store/progressStore';
-
-// This would normally come from your state management solution
-import { ProgressTracker } from '../services/ProgressTracker';
 
 export default function Progress() {
   const [activeTab, setActiveTab] = React.useState<'progress' | 'achievements'>('progress');

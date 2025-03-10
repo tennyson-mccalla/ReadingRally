@@ -11,7 +11,10 @@ import {
   Legend,
   ChartData,
 } from 'chart.js';
-import { Card, CardBody, CardTitle, Progress } from '../common';
+import { Card } from '../common/Card';
+import { CardBody } from '../common/Card';
+import { CardTitle } from '../common/Card';
+import { Progress } from '../common/Progress';
 
 // Register ChartJS components
 ChartJS.register(

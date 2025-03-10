@@ -1,27 +1,47 @@
 import React from 'react';
-import { Button } from '../common';
+import { Link, useLocation } from 'react-router-dom';
+import { Button } from '../common/Button';
 
 export const Header: React.FC = () => {
+  const location = useLocation();
+
+  const isActive = (path: string) => location.pathname === path;
+
   return (
     <header className="bg-base-100 shadow-md">
       <div className="container mx-auto px-4">
         <div className="navbar min-h-16">
           <div className="flex-1">
-            <a className="text-2xl font-bold text-primary">
+            <Link to="/" className="text-2xl font-bold text-primary">
               ReadingRally
-            </a>
+            </Link>
           </div>
 
           <div className="flex-none gap-4">
-            <Button variant="ghost" size="sm">
-              Dashboard
-            </Button>
-            <Button variant="ghost" size="sm">
-              My Progress
-            </Button>
-            <Button variant="ghost" size="sm">
-              Achievements
-            </Button>
+            <Link to="/">
+              <Button
+                variant={isActive('/') ? 'primary' : 'ghost'}
+                size="sm"
+              >
+                Dashboard
+              </Button>
+            </Link>
+            <Link to="/progress">
+              <Button
+                variant={isActive('/progress') ? 'primary' : 'ghost'}
+                size="sm"
+              >
+                My Progress
+              </Button>
+            </Link>
+            <Link to="/reading">
+              <Button
+                variant={isActive('/reading') ? 'primary' : 'ghost'}
+                size="sm"
+              >
+                Start Reading
+              </Button>
+            </Link>
             <div className="dropdown dropdown-end">
               <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                 <div className="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center">
