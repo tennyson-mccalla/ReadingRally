@@ -4,6 +4,11 @@ interface ReadingAnalysis {
   accuracy: number;
   fluency: number;
   feedback: string;
+  pronunciationNotes: {
+    potentialIssues: string[];
+    strengths: string[];
+    practiceWords: string[];
+  };
 }
 
 export class AIAnalysisService {
@@ -59,24 +64,38 @@ export class AIAnalysisService {
     durationSeconds: number
   ): Promise<ReadingAnalysis> {
     const prompt = `
-      Analyze this reading session:
+      Analyze this reading session with special attention to pronunciation:
       Target text: "${targetText}"
-      Actual reading: "${transcript}"
+      Actual reading (Note: This is a Whisper transcription that may have auto-corrected pronunciations): "${transcript}"
       Duration: ${durationSeconds} seconds
 
-      Respond with a JSON object using exactly this format (maintain the exact key names and types):
+      Important: Since Whisper may have corrected mispronunciations in the transcription, analyze the text carefully for:
+      1. Word substitutions or skips that might indicate pronunciation difficulty
+      2. Word patterns that suggest the reader might be struggling (e.g., hesitations, repetitions)
+      3. Areas where the transcription seems "too perfect" given the context
+
+      Respond with a JSON object using exactly this format:
       {
         "wpm": number,
         "accuracy": number,
         "fluency": number,
-        "feedback": string
+        "feedback": string,
+        "pronunciationNotes": {
+          "potentialIssues": string[],
+          "strengths": string[],
+          "practiceWords": string[]
+        }
       }
 
       Requirements:
       - wpm: Calculate words per minute
       - accuracy: Percentage of words correct (0-100)
       - fluency: Reading fluency score (0-100)
-      - feedback: Brief, encouraging feedback with one strength and one area to improve
+      - feedback: Brief, encouraging feedback focusing on both strengths and areas for improvement
+      - pronunciationNotes: Specific observations about pronunciation patterns
+        - potentialIssues: List specific words or patterns that might need attention
+        - strengths: List areas of strong pronunciation
+        - practiceWords: Suggest 2-3 words to practice that follow similar patterns
 
       Return ONLY the JSON object, no other text.
     `;
@@ -94,7 +113,7 @@ export class AIAnalysisService {
         messages: [
           {
             role: 'system',
-            content: 'You are a supportive reading teacher. Analyze reading performance and provide encouraging feedback.'
+            content: 'You are an experienced reading teacher and speech pathologist. Focus on identifying potential pronunciation patterns and providing constructive, encouraging feedback.'
           },
           {
             role: 'user',
@@ -121,7 +140,8 @@ export class AIAnalysisService {
         wpm: analysis.wpm,
         accuracy: analysis.accuracy,
         fluency: analysis.fluency,
-        feedback: analysis.feedback
+        feedback: analysis.feedback,
+        pronunciationNotes: analysis.pronunciationNotes
       };
     } catch (error) {
       console.error('Failed to parse GPT response:', error);

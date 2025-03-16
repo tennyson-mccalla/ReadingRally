@@ -49,9 +49,17 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
   currentLevel,
   nextLevelProgress,
 }) => {
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   // Prepare data for the reading speed chart
   const speedChartData: ChartData<'line'> = {
-    labels: readingHistory.map(entry => entry.date),
+    labels: readingHistory.map(entry => formatDate(entry.date)),
     datasets: [
       {
         label: 'Words per Minute',
@@ -72,6 +80,8 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: true,
+    aspectRatio: 2,
     plugins: {
       legend: {
         position: 'top' as const,
@@ -146,7 +156,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
       <Card>
         <CardBody>
           <CardTitle>Reading Progress</CardTitle>
-          <div className="h-[400px]">
+          <div className="w-full aspect-[2/1] min-h-[300px]">
             <Line options={chartOptions} data={speedChartData} />
           </div>
         </CardBody>
@@ -160,7 +170,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
             {readingHistory.slice(-5).reverse().map((entry, index) => (
               <div key={index} className="flex justify-between items-center p-2 hover:bg-base-200 rounded-lg">
                 <div>
-                  <p className="font-semibold">{entry.date}</p>
+                  <p className="font-semibold">{formatDate(entry.date)}</p>
                   <p className="text-sm text-base-content/70">
                     {entry.wpm} WPM with {entry.accuracy}% accuracy
                   </p>

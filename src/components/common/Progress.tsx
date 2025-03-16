@@ -35,9 +35,9 @@ export const Progress: React.FC<ProgressProps> = ({
 
   const sizeClasses = {
     xs: 'h-1',
-    sm: 'h-2',
-    md: 'h-4',
-    lg: 'h-6',
+    sm: 'h-5',
+    md: 'h-6',
+    lg: 'h-8',
   };
 
   const progressClasses = clsx(
@@ -53,7 +53,7 @@ export const Progress: React.FC<ProgressProps> = ({
     `${Math.round((val / maximum) * 100)}%`;
 
   return (
-    <div className="relative">
+    <div className="relative text-left">
       <progress
         className={progressClasses}
         value={value}
@@ -61,7 +61,7 @@ export const Progress: React.FC<ProgressProps> = ({
       />
       {showLabel && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xs font-medium">
+          <span className={`text-xs font-medium ${labelFormat ? 'translate-y-[-2px]' : 'translate-y-[1px]'}`}>
             {labelFormat ? labelFormat(value, max) : defaultLabelFormat(value, max)}
           </span>
         </div>

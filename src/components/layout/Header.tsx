@@ -54,7 +54,7 @@ export const Header: React.FC = () => {
             </Link>
             <div className="dropdown dropdown-end">
               <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-                <div className="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-primary text-primary-content text-center leading-[40px]">
                   <span className="text-lg font-bold">JS</span>
                 </div>
               </label>

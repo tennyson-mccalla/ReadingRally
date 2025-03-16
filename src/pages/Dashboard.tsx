@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardBody, CardTitle, CardActions, Button, Badge, Progress, Notification } from '../components/common';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [showToast, setShowToast] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState('');
   const [readingSpeed, setReadingSpeed] = React.useState(85);
@@ -11,8 +13,7 @@ export default function Dashboard() {
   });
 
   const handleStartReading = () => {
-    setToastMessage('Starting new reading session...');
-    setShowToast(true);
+    navigate('/reading');
   };
 
   const handleContinueReading = (book: string) => {
